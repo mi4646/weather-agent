@@ -12,9 +12,13 @@
 weather-agent/
 ├── .python-version           # pyenv 虚拟环境（Python 3.14）
 ├── .env.example              # API Key 配置模板
-├── requirements.txt          # openai + httpx + python-dotenv
+├── requirements.txt          # 依赖列表
+├── pyproject.toml            # pytest 配置
 ├── docs/
 │   └── agent-tool-design.md  # Agent Tool 设计指南（教学文档）
+├── tests/
+│   ├── __init__.py
+│   └── test_tools.py         # geocode 工具单元测试（39 个用例）
 ├── src/
 │   ├── tools.py              # 工具定义 + 注册 + 执行
 │   ├── agent.py              # Agent 核心循环
@@ -57,8 +61,20 @@ main.py → Agent.run()
 
 | 工具 | 输入 | 数据源 | 说明 |
 |------|------|--------|------|
-| `geocode` | 城市名 | Open-Meteo（免费） | 城市名 → 经纬度 |
+| `geocode` | 城市名/地址 | Open-Meteo（免费） | 地址 → 经纬度。支持完整地址（如"河南郑州金水区"），三级降级查询 |
 | `get_weather` | lat, lon | GFS 全球预报 | 气温/体感/湿度/风速/云量/气压/天气现象 |
+
+### geocode 智能地址解析
+
+`geocode` 对含省/市/区的完整地址（如 "河南郑州金水区"）会自动降级查询：
+
+| 步骤 | 策略 | 示例 |
+|------|------|------|
+| 第 1 步 | 原样查询 | `geocode("河南郑州金水区")` |
+| 第 2 步 | 剥离区县级后缀后重试 | `geocode("河南郑州金水")` → 去掉 "区" |
+| 第 3 步 | 提取纯城市名重试 | `geocode("郑州")` → 通过地址解析提取 |
+
+内置 300+ 中国地级市名称列表，支持省级简称（如 "河南" 和 "河南省" 均可），正确处理直辖市歧义（"北京市朝阳区" → "北京"，不误识别为辽宁 "朝阳"）。
 
 ## 快速开始
 
@@ -138,8 +154,17 @@ register(
 
 - **语言**: Python 3.14
 - **环境**: pyenv virtualenv
-- **依赖**: openai（LLM 调用）、httpx（HTTP 请求）、python-dotenv（环境变量）
+- **依赖**: openai（LLM 调用）、httpx（HTTP 请求）、python-dotenv（环境变量）、pytest + pytest-asyncio（测试）
 - **LLM**: 兼容 OpenAI 接口的任意模型（DeepSeek / 通义千问 / 豆包 / OpenAI）
+
+## 运行测试
+
+```bash
+cd weather-agent
+pytest tests/ -v
+```
+
+测试覆盖 `_extract_city_name`（地址解析）、`_format_geocode_result`（结果格式化）、`geocode`（三级降级流程），共 39 个用例。
 
 ## 学习路径
 
@@ -148,7 +173,8 @@ register(
 3. 阅读 `src/agent.py` → 理解 Agent 核心循环
 4. 阅读 `src/logger.py` → 理解日志双输出机制
 5. 阅读 `src/main.py` → 理解如何串联
-6. 动手加一个新工具 → 巩固理解
+6. 阅读 `tests/test_tools.py` → 理解如何用 pytest 测试工具
+7. 动手加一个新工具 → 巩固理解
 
 ---
 

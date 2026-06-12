@@ -2,3 +2,7 @@
 logs/
 __pycache__/
 *.pyc
+
+# pytest
+.pytest_cache/
+*.py[cod]
