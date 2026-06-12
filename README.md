@@ -18,6 +18,7 @@ weather-agent/
 ├── src/
 │   ├── tools.py              # 工具定义 + 注册 + 执行
 │   ├── agent.py              # Agent 核心循环
+│   ├── logger.py             # 日志模块（双输出）
 │   └── main.py               # CLI 入口
 └── README.md
 ```
@@ -90,6 +91,29 @@ python src/main.py 帮我查一下今天北京天气
 python src/main.py
 ```
 
+## 查看执行日志
+
+每次运行，详细的执行流程会记录到 `logs/agent.log`：
+
+```bash
+# 终端 1：运行 Agent（只看到最终答案）
+python src/main.py 查北京天气
+
+# 终端 2：实时查看完整执行流程
+tail -f logs/agent.log
+```
+
+日志会记录：
+
+| 记录内容 | 学习价值 |
+|----------|----------|
+| 🛠️ 已注册工具列表 | LLM 收到了哪些工具说明书 |
+| 📨 每轮发给 LLM 的消息 | 消息历史如何逐轮累积 |
+| ⬅️ LLM 原始响应（finish_reason + tool_calls） | LLM 返回的原始 JSON 决策 |
+| 🔧 工具执行（名称 + 参数 + 返回结果） | 工具如何被调用和执行 |
+
+**这就是 Agent 的完整数据流**——LLM 怎么知道有工具可用、怎么决策、工具怎么被执行。
+
 ## 添加新工具
 
 三步搞定，不改 agent.py：
@@ -122,8 +146,9 @@ register(
 1. 阅读 `docs/agent-tool-design.md` → 理解 Agent Tool 的设计思想
 2. 阅读 `src/tools.py` → 理解工具如何定义和注册
 3. 阅读 `src/agent.py` → 理解 Agent 核心循环
-4. 阅读 `src/main.py` → 理解如何串联
-5. 动手加一个新工具 → 巩固理解
+4. 阅读 `src/logger.py` → 理解日志双输出机制
+5. 阅读 `src/main.py` → 理解如何串联
+6. 动手加一个新工具 → 巩固理解
 
 ---
 
