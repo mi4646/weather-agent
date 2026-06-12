@@ -6,3 +6,7 @@ __pycache__/
 # pytest
 .pytest_cache/
 *.py[cod]
+
+# IDEs
+.vscode/
+.idea/
