@@ -26,7 +26,7 @@ def build_llm_client() -> AsyncOpenAI:
     model = os.getenv("LLM_MODEL", "gpt-4o")
 
     if not api_key:
-        print("❌ 请设置环境变量 LLM_API_KEY")
+        print("请设置环境变量 LLM_API_KEY")
         print("   方式 1: 在 .env 文件中添加 LLM_API_KEY=your-key")
         print("   方式 2: export LLM_API_KEY=your-key")
         sys.exit(1)
@@ -39,7 +39,7 @@ async def main():
     if len(sys.argv) > 1:
         user_input = " ".join(sys.argv[1:])
     else:
-        user_input = input("👤 您：")
+        user_input = input("您：")
 
     if not user_input.strip():
         print("请输入内容")
@@ -54,10 +54,11 @@ async def main():
         model=model,
         tools=get_definitions(),
         tool_executors={name: info["execute"] for name, info in tool_registry.items()},
+        verbose=True,
     )
 
     # 运行
-    print("🤖 Agent 思考中...")
+    print("Agent 思考中...")
     print("-" * 40)
     result = await agent.run(user_input)
     print(result)
